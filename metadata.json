@@ -1,0 +1,6 @@
+{
+  "name": "SlumberRain - Sleep Rain & Weather Soundscape",
+  "description": "A dim-grey night sleep companion featuring seamlessly looping procedural rain, thunder, wind layers, and gradual fade-out sleep timer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
