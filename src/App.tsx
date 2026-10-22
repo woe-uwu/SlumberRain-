@@ -478,7 +478,7 @@ export default function App() {
             </span>
           </div>
 
-          {/* Clean Nav Links (Desktop & Tablet only to protect mobile Play button) */}
+          {/* Clean Nav Links */}
           <nav className="hidden md:flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#8e95a5]">
             <button
               type="button"
@@ -488,27 +488,6 @@ export default function App() {
             >
               <Info className="w-3.5 h-3.5" />
               <span>Sleep Science</span>
-            </button>
-            {/* HIDE ANDROID APK BUTTON IF ALREADY INSTALLED */}
-            {!isInstalled && (
-              <button
-                type="button"
-                onClick={() => setShowAndroidDownload(true)}
-                className="flex px-2.5 py-1.5 rounded-lg bg-[#222630] hover:bg-[#2a2f3c] border border-[#353b49] text-[#dfe3eb] hover:text-white transition-colors items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                title="Download Android APK or install standalone app"
-              >
-                <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Android APK</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={toggleAllSections}
-              className="hidden lg:flex px-2.5 py-1.5 rounded-lg hover:bg-[#252831] hover:text-[#dfe3eb] transition-colors items-center gap-1.5 cursor-pointer"
-              title="Expand / minimize sections"
-            >
-              <ChevronsUpDown className="w-3.5 h-3.5" />
-              <span>Toggle Layout</span>
             </button>
           </nav>
 
@@ -568,7 +547,7 @@ export default function App() {
       </header>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 space-y-5">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-6 space-y-5">
         {/* HERO SECTION / QUICK STATUS BAR WITH MASTER VOLUME */}
         <section className="bg-[#23262d] border border-[#343844] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-2 max-w-lg">
@@ -731,8 +710,41 @@ export default function App() {
           </div>
         </section>
 
-        {/* CALM VISUALIZER CANVAS */}
+        {/* CALM VISUALIZER CANVAS (ACOUSTIC RESONANCE FIELD) */}
         <SoundscapeVisualizer isPlaying={isPlaying} rainType={settings.rainType} theme={theme} />
+
+        {/* DEDICATED TOGGLE LAYOUT BUTTON (BELOW ACOUSTIC RESONANCE FIELD) */}
+        <div className="flex items-center justify-between py-1 px-1">
+          <div className="flex items-center gap-2 text-xs text-[#828a9c]">
+            <span
+              className="w-2 h-2 rounded-full inline-block transition-transform duration-300"
+              style={{
+                backgroundColor: isPlaying ? theme.colorHex : '#4b5263',
+                transform: isPlaying ? 'scale(1.1)' : 'scale(1)',
+              }}
+            />
+            <span className="font-medium text-[#9da4b6]">Soundscape Controls</span>
+            <span className="text-[11px] text-[#5d6374] hidden sm:inline">
+              ({Object.values(expandedSections).filter(Boolean).length} of 3 sections expanded)
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleAllSections}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22252d] hover:bg-[#2a2f3a] border border-[#363a48] hover:border-[#454c5e] text-xs font-medium text-[#c0c6d4] hover:text-white transition-all cursor-pointer shadow-xs active:scale-98 select-none"
+            title={
+              Object.values(expandedSections).every(Boolean)
+                ? 'Minimize all control panels for a distraction-free view'
+                : 'Expand all control panels'
+            }
+          >
+            <ChevronsUpDown className="w-3.5 h-3.5" style={{ color: theme.colorHex }} />
+            <span>
+              {Object.values(expandedSections).every(Boolean) ? 'Collapse All Sections' : 'Expand All Sections'}
+            </span>
+          </button>
+        </div>
 
         {/* 1. SOUNDSCAPES & PRESETS (UNIFIED PRESETS & FAVORITES TABBED CARD) */}
         <SoundscapePresets
@@ -797,7 +809,7 @@ export default function App() {
       />
 
       {/* FOOTER */}
-      <footer className="mt-auto border-t border-[#292d37] py-5 px-4 sm:px-6 text-center text-xs text-[#717787]">
+      <footer className="mt-auto border-t border-[#292d37] py-5 pb-24 md:pb-5 px-4 sm:px-6 text-center text-xs text-[#717787]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© 2026 SlumberRain. Real field recordings &amp; seamless procedural audio for restorative sleep.</p>
           <div className="flex items-center gap-3 text-[#8a91a1]">
@@ -828,6 +840,101 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* MOBILE BOTTOM CONTROL DOCK (EFFORTLESS ONE-THUMB PLAYBACK ON ANDROID & MOBILE CHROME) */}
+      <aside
+        aria-label="Mobile Playback Controls"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#181a20]/95 backdrop-blur-md border-t border-[#2e3340] px-4 pt-2.5 pb-[max(env(safe-area-inset-bottom,0px),0.75rem)] shadow-2xl"
+      >
+        <div className="max-w-md mx-auto flex items-center justify-between gap-3">
+          {/* Bedside Mode Quick Launch */}
+          <button
+            type="button"
+            onClick={() => setIsBedsideMode(true)}
+            className="w-10 h-10 rounded-xl bg-[#22252e] border border-[#343946] flex items-center justify-center text-[#9ea5b7] active:scale-95 shrink-0"
+            title="Bedside Clock"
+            aria-label="Open Bedside Clock"
+          >
+            <Moon className="w-4 h-4" style={{ color: theme.colorHex }} />
+          </button>
+
+          {/* Soundscape Info */}
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-semibold text-[#dfe3eb] truncate flex items-center gap-1.5">
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: isPlaying ? theme.colorHex : '#555b6c' }}
+              />
+              <span className="capitalize truncate">
+                {settings.rainType.replace('-', ' ')}
+              </span>
+            </div>
+            <div className="text-[11px] text-[#82899a] truncate flex items-center gap-1.5 font-mono">
+              {timerMinutes > 0 && remainingSeconds > 0 ? (
+                <span style={{ color: isFadingOut ? '#f59e0b' : undefined }}>
+                  {Math.floor(remainingSeconds / 60)}m {remainingSeconds % 60}s left
+                </span>
+              ) : (
+                <span>Vol: {masterPct}%</span>
+              )}
+            </div>
+          </div>
+
+          {/* Master Mute Quick Button */}
+          <button
+            type="button"
+            onClick={handleToggleMasterMute}
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors shrink-0 active:scale-95 ${
+              isMasterMuted
+                ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                : 'bg-[#22252e] text-[#9ba2b3] border-[#343946]'
+            }`}
+            title={isMasterMuted ? 'Unmute master' : 'Mute master'}
+            aria-label={isMasterMuted ? 'Unmute volume' : 'Mute volume'}
+          >
+            {isMasterMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+
+          {/* Primary Thumb-Reachable Play/Pause Button */}
+          <button
+            type="button"
+            onClick={handleTogglePlay}
+            className="h-10 px-5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg whitespace-nowrap active:scale-95 shrink-0 select-none"
+            style={
+              isPlaying
+                ? {
+                    backgroundColor: theme.colorHex,
+                    color: '#16181d',
+                    boxShadow: `0 0 16px ${theme.glowRgba}`,
+                  }
+                : {
+                    backgroundColor: '#2b303d',
+                    color: '#ffffff',
+                    border: '1px solid #434a5d',
+                  }
+            }
+            title={isPlaying ? 'Pause soundscape' : 'Play soundscape'}
+            aria-label={isPlaying ? 'Pause soundscape' : 'Play soundscape'}
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-4 h-4 fill-current shrink-0" />
+                <span>Pause</span>
+                <span className="flex items-end gap-0.5 h-3 ml-0.5" aria-hidden="true">
+                  <span className="w-0.5 h-3 bg-[#16181d] rounded-full animate-pulse" />
+                  <span className="w-0.5 h-1.5 bg-[#16181d] rounded-full animate-pulse delay-75" />
+                  <span className="w-0.5 h-2 bg-[#16181d] rounded-full animate-pulse delay-150" />
+                </span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-current shrink-0" />
+                <span>Play</span>
+              </>
+            )}
+          </button>
+        </div>
+      </aside>
     </div>
   );
 }
