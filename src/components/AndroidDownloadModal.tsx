@@ -28,7 +28,7 @@ export const AndroidDownloadModal: React.FC<AndroidDownloadModalProps> = ({
   onClose,
   theme,
 }) => {
-  const { isInstallable, isInstalled, isAndroid, triggerInstall } = usePWAInstall();
+  const { isInstallable, isInstalled, isAndroid, triggerInstall, setManualInstalled } = usePWAInstall();
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
 
@@ -286,18 +286,36 @@ On your Android phone in Google Chrome, Samsung Internet, or Brave:
                   <span>Install on Android Device</span>
                 </button>
               ) : isInstalled ? (
-                <div className="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Already Installed as Standalone App</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>App is Installed (Top APK button hidden)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setManualInstalled(false)}
+                    className="text-[11px] text-[#808796] hover:text-[#c5cbd6] underline cursor-pointer ml-1"
+                  >
+                    Reset status
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-1.5 w-full">
+                <div className="space-y-2 w-full">
                   <div className="text-xs text-[#b0b7c6] flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     <span>To install in Chrome/Brave/Samsung Internet on Android:</span>
                   </div>
                   <div className="bg-[#181a20] p-2.5 rounded-lg border border-[#2b2f3a] text-xs text-[#8c94a4]">
                     Tap browser menu <strong>⋮ (three dots)</strong> at the top-right &rarr; Tap <strong>&quot;Install app&quot;</strong> or <strong>&quot;Add to Home Screen&quot;</strong>.
+                  </div>
+                  <div className="pt-0.5 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setManualInstalled(true)}
+                      className="px-2.5 py-1 rounded-lg bg-[#252934] hover:bg-[#2d3240] border border-[#373e4d] text-[11px] text-[#adb5c5] hover:text-white transition-colors cursor-pointer"
+                    >
+                      Already installed? Hide top APK button
+                    </button>
                   </div>
                 </div>
               )}

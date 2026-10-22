@@ -110,7 +110,7 @@ export const BedsideMode: React.FC<BedsideModeProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col justify-between p-6 md:p-12 transition-colors duration-500 select-none overflow-hidden"
+      className="fixed inset-0 z-50 flex flex-col justify-between p-4 sm:p-6 md:p-12 pt-[max(env(safe-area-inset-top,0px),1rem)] pb-[max(env(safe-area-inset-bottom,0px),1rem)] pl-[max(env(safe-area-inset-left,0px),1rem)] pr-[max(env(safe-area-inset-right,0px),1rem)] transition-colors duration-500 select-none overflow-hidden"
       style={{
         backgroundColor: '#16181d',
       }}

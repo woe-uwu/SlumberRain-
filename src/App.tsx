@@ -32,6 +32,7 @@ import { BedsideMode } from './components/BedsideMode';
 import { ThemeSelector } from './components/ThemeSelector';
 import { SleepScienceModal } from './components/SleepScienceModal';
 import { AndroidDownloadModal } from './components/AndroidDownloadModal';
+import { usePWAInstall } from './hooks/usePWAInstall';
 
 const STORAGE_CUSTOM_PRESETS_KEY = 'slumberrain_custom_presets';
 const STORAGE_LAST_SETTINGS_KEY = 'slumberrain_settings';
@@ -46,6 +47,8 @@ interface ExpandedState {
 }
 
 export default function App() {
+  const { isInstalled } = usePWAInstall();
+
   // Theme state
   const [themeId, setThemeId] = useState<ThemeAccent>(() => {
     try {
@@ -455,13 +458,13 @@ export default function App() {
         />
       )}
 
-      {/* STREAMLINED NON-REPETITIVE TOP BAR (NO SIDE SCROLL) */}
-      <header className="sticky top-0 z-30 bg-[#1c1e22]/95 backdrop-blur-md border-b border-[#2d313b] px-3 sm:px-6 py-2">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+      {/* STREAMLINED NON-REPETITIVE TOP BAR (NO SIDE SCROLL & GUARANTEED FIT) */}
+      <header className="sticky top-0 z-30 bg-[#1c1e22]/95 backdrop-blur-md border-b border-[#2d313b] px-3 sm:px-6 pt-[max(env(safe-area-inset-top,0px),0.5rem)] pb-2 overflow-x-hidden">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4 min-w-0">
           {/* Logo */}
           <div className="flex items-center gap-2 whitespace-nowrap shrink-0">
             <div
-              className="w-7 h-7 rounded-lg border flex items-center justify-center transition-colors shadow-xs"
+              className="w-7 h-7 rounded-lg border flex items-center justify-center transition-colors shadow-xs shrink-0"
               style={{
                 backgroundColor: theme.activeBg,
                 borderColor: theme.borderHex,
@@ -475,8 +478,8 @@ export default function App() {
             </span>
           </div>
 
-          {/* Clean Nav Links */}
-          <nav className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#8e95a5]">
+          {/* Clean Nav Links (Desktop & Tablet only to protect mobile Play button) */}
+          <nav className="hidden md:flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#8e95a5]">
             <button
               type="button"
               onClick={() => setShowSleepScience(true)}
@@ -484,17 +487,20 @@ export default function App() {
               title="Sleep science and acoustic research"
             >
               <Info className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Sleep Science</span>
+              <span>Sleep Science</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setShowAndroidDownload(true)}
-              className="flex px-2.5 py-1.5 rounded-lg bg-[#222630] hover:bg-[#2a2f3c] border border-[#353b49] text-[#dfe3eb] hover:text-white transition-colors items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-              title="Download Android APK or install standalone app"
-            >
-              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Android APK</span>
-            </button>
+            {/* HIDE ANDROID APK BUTTON IF ALREADY INSTALLED */}
+            {!isInstalled && (
+              <button
+                type="button"
+                onClick={() => setShowAndroidDownload(true)}
+                className="flex px-2.5 py-1.5 rounded-lg bg-[#222630] hover:bg-[#2a2f3c] border border-[#353b49] text-[#dfe3eb] hover:text-white transition-colors items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                title="Download Android APK or install standalone app"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Android APK</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={toggleAllSections}
@@ -506,13 +512,13 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Action Cluster: Moon Icon Button + Theme Dropdown + Play Button */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Action Cluster: Moon Icon Button + Theme Dropdown + Play Button (Shrink-0 & Always Visible) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
             {/* Moon Icon Button (No text) */}
             <button
               type="button"
               onClick={() => setIsBedsideMode(true)}
-              className="w-8 h-8 rounded-lg bg-[#22252c] hover:bg-[#282d36] border border-[#333744] flex items-center justify-center text-[#959cb0] hover:text-[#dfe3eb] transition-colors cursor-pointer shadow-xs active:scale-95"
+              className="w-8 h-8 rounded-lg bg-[#22252c] hover:bg-[#282d36] border border-[#333744] flex items-center justify-center text-[#959cb0] hover:text-[#dfe3eb] transition-colors cursor-pointer shadow-xs active:scale-95 shrink-0"
               title="Bedside Clock"
               aria-label="Open Bedside Clock"
             >
@@ -521,11 +527,11 @@ export default function App() {
 
             <ThemeSelector currentTheme={themeId} onSelectTheme={setThemeId} />
 
-            {/* Master Play / Pause Button */}
+            {/* Master Play / Pause Button - HIGH PRIORITY, GUARANTEED VISIBLE & NEVER PUSHED OFF */}
             <button
               type="button"
               onClick={handleTogglePlay}
-              className="h-8 px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap active:scale-95 select-none"
+              className="h-8 px-3 sm:px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap active:scale-95 select-none shrink-0"
               style={
                 isPlaying
                   ? {
@@ -542,7 +548,7 @@ export default function App() {
             >
               {isPlaying ? (
                 <>
-                  <Pause className="w-3.5 h-3.5 fill-current" />
+                  <Pause className="w-3.5 h-3.5 fill-current shrink-0" />
                   <span>Pause</span>
                   <span className="flex items-end gap-0.5 h-2.5 ml-0.5" aria-hidden="true">
                     <span className="w-0.5 h-2.5 bg-[#16181d] rounded-full animate-pulse" />
@@ -552,7 +558,7 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <Play className="w-3.5 h-3.5 fill-current shrink-0" />
                   <span>Play</span>
                 </>
               )}
@@ -602,15 +608,17 @@ export default function App() {
                 <span>Sleep Science</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setShowAndroidDownload(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1e24] hover:bg-[#282d37] border border-[#343846] text-xs font-medium text-emerald-400/90 hover:text-emerald-300 transition-all cursor-pointer shadow-xs active:scale-98"
-                title="Download APK package or install on Android phone"
-              >
-                <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Get Android APK</span>
-              </button>
+              {!isInstalled && (
+                <button
+                  type="button"
+                  onClick={() => setShowAndroidDownload(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1e24] hover:bg-[#282d37] border border-[#343846] text-xs font-medium text-emerald-400/90 hover:text-emerald-300 transition-all cursor-pointer shadow-xs active:scale-98"
+                  title="Download APK package or install on Android phone"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Get Android APK</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -815,7 +823,7 @@ export default function App() {
               className="hover:text-emerald-400 text-emerald-400/90 transition-colors cursor-pointer flex items-center gap-1"
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Android APK</span>
+              <span>{isInstalled ? 'Android App (Installed)' : 'Android APK'}</span>
             </button>
           </div>
         </div>

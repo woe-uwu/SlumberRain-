@@ -53,7 +53,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         <span className="hidden sm:inline text-xs text-[#d5d9e2]">
           {activeThemeConfig.name}
         </span>
-        <span className="sm:hidden text-xs text-[#d5d9e2]">Theme</span>
+        <span className="hidden xs:inline sm:hidden text-xs text-[#d5d9e2]">Theme</span>
         <ChevronDown
           className={`w-3.5 h-3.5 text-[#828898] transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-[#dfe3eb]' : ''
