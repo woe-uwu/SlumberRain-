@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   CloudRain,
   ChevronsUpDown,
+  Smartphone,
 } from 'lucide-react';
 
 import { WeatherSettings, SoundPreset, RainType, FavoritePreset, ThemeAccent } from './types';
@@ -29,6 +30,8 @@ import { SleepTimer } from './components/SleepTimer';
 import { SoundscapeVisualizer } from './components/SoundscapeVisualizer';
 import { BedsideMode } from './components/BedsideMode';
 import { ThemeSelector } from './components/ThemeSelector';
+import { SleepScienceModal } from './components/SleepScienceModal';
+import { AndroidDownloadModal } from './components/AndroidDownloadModal';
 
 const STORAGE_CUSTOM_PRESETS_KEY = 'slumberrain_custom_presets';
 const STORAGE_LAST_SETTINGS_KEY = 'slumberrain_settings';
@@ -181,8 +184,10 @@ export default function App() {
   // Bedside Nightstand Mode (12-hour clock)
   const [isBedsideMode, setIsBedsideMode] = useState<boolean>(false);
 
-  // Informational Sleep Modal/Drawer
+  // Informational Sleep Modal
   const [showSleepScience, setShowSleepScience] = useState<boolean>(false);
+  // Android APK & WebAPK Download Modal
+  const [showAndroidDownload, setShowAndroidDownload] = useState<boolean>(false);
 
   // Volume mute memory
   const previousMasterVolume = useRef<number>(settings.masterVolume > 0 ? settings.masterVolume : 0.8);
@@ -409,6 +414,20 @@ export default function App() {
     }
   };
 
+  const handleApplySciencePreset = (partial: Partial<WeatherSettings>, timerMins?: number) => {
+    setSettings((prev) => {
+      const updated = { ...prev, ...partial };
+      if (isPlaying) {
+        soundEngine.updateSettings(updated);
+      }
+      return updated;
+    });
+    if (timerMins) {
+      setTimerMinutes(timerMins);
+      setRemainingSeconds(timerMins * 60);
+    }
+  };
+
   const isMasterMuted = settings.masterVolume <= 0.01;
   const masterPct = Math.round(settings.masterVolume * 100);
 
@@ -457,19 +476,29 @@ export default function App() {
           </div>
 
           {/* Clean Nav Links */}
-          <nav className="flex items-center gap-2 text-xs font-medium text-[#8e95a5]">
+          <nav className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#8e95a5]">
             <button
               type="button"
-              onClick={() => setShowSleepScience(!showSleepScience)}
-              className="hidden sm:flex px-2.5 py-1.5 rounded-lg hover:bg-[#252831] hover:text-[#dfe3eb] transition-colors items-center gap-1.5 cursor-pointer"
+              onClick={() => setShowSleepScience(true)}
+              className="flex px-2.5 py-1.5 rounded-lg hover:bg-[#252831] hover:text-[#dfe3eb] transition-colors items-center gap-1.5 cursor-pointer"
+              title="Sleep science and acoustic research"
             >
               <Info className="w-3.5 h-3.5" />
-              <span>Sleep Science</span>
+              <span className="hidden xs:inline">Sleep Science</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAndroidDownload(true)}
+              className="flex px-2.5 py-1.5 rounded-lg bg-[#222630] hover:bg-[#2a2f3c] border border-[#353b49] text-[#dfe3eb] hover:text-white transition-colors items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+              title="Download Android APK or install standalone app"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Android APK</span>
             </button>
             <button
               type="button"
               onClick={toggleAllSections}
-              className="hidden md:flex px-2.5 py-1.5 rounded-lg hover:bg-[#252831] hover:text-[#dfe3eb] transition-colors items-center gap-1.5 cursor-pointer"
+              className="hidden lg:flex px-2.5 py-1.5 rounded-lg hover:bg-[#252831] hover:text-[#dfe3eb] transition-colors items-center gap-1.5 cursor-pointer"
               title="Expand / minimize sections"
             >
               <ChevronsUpDown className="w-3.5 h-3.5" />
@@ -560,16 +589,27 @@ export default function App() {
                 title="Reset all rain, thunder, and master volume levels to default"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-[#8890a2]" />
-                <span>Reset Mix to Defaults</span>
+                <span>Reset Mix</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setShowSleepScience(!showSleepScience)}
-                className="inline-flex sm:hidden items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1e24] hover:bg-[#282d37] border border-[#343846] text-xs font-medium text-[#9da4b6] hover:text-[#dfe3eb] transition-all cursor-pointer shadow-xs"
+                onClick={() => setShowSleepScience(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1e24] hover:bg-[#282d37] border border-[#343846] text-xs font-medium text-[#9da4b6] hover:text-[#dfe3eb] transition-all cursor-pointer shadow-xs active:scale-98"
+                title="Learn how acoustic masking and pink noise improve slow-wave sleep"
               >
                 <Info className="w-3.5 h-3.5 text-[#8890a2]" />
                 <span>Sleep Science</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAndroidDownload(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1e24] hover:bg-[#282d37] border border-[#343846] text-xs font-medium text-emerald-400/90 hover:text-emerald-300 transition-all cursor-pointer shadow-xs active:scale-98"
+                title="Download APK package or install on Android phone"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Get Android APK</span>
               </button>
             </div>
           </div>
@@ -731,50 +771,27 @@ export default function App() {
           onToggleExpand={() => toggleSection('timer')}
         />
 
-        {/* SLEEP SCIENCE COLLAPSIBLE EXPLANATION */}
-        {showSleepScience && (
-          <section className="bg-[#23262d] border border-[#343844] rounded-2xl p-5 shadow-sm space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2e333e]">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5" style={{ color: theme.colorHex }} />
-                <h3 className="text-base font-semibold text-[#dfe3eb]">Why Rain & Sound Masking Support Deep Sleep</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSleepScience(false)}
-                className="text-xs text-[#8e95a5] hover:text-[#dfe3eb] cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-[#8e95a5] leading-relaxed">
-              <div className="bg-[#1c1e24] p-4 rounded-xl border border-[#303542]">
-                <h4 className="font-semibold text-[#c9ced8] mb-1">Acoustic Masking (Pink Noise)</h4>
-                <p>
-                  Steady rainfall distributes energy evenly across human auditory frequencies, masking sudden outdoor noises like sirens or traffic so your brain avoids sleep interruptions.
-                </p>
-              </div>
-              <div className="bg-[#1c1e24] p-4 rounded-xl border border-[#303542]">
-                <h4 className="font-semibold text-[#c9ced8] mb-1">Gentle Fade-Out Protection</h4>
-                <p>
-                  Sudden silences wake light sleepers due to contrast shock. The 1 to 5 minute exponential fade smoothly guides your auditory senses into silence.
-                </p>
-              </div>
-              <div className="bg-[#1c1e24] p-4 rounded-xl border border-[#303542]">
-                <h4 className="font-semibold text-[#c9ced8] mb-1">Dim-Grey Night Palette</h4>
-                <p>
-                  Stark high-contrast screens strain relaxed pupils in dark bedrooms. Our warm dim-grey interface preserves natural melatonin production.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
+
+      {/* SLEEP SCIENCE MODAL WITH RICH RESEARCH & PRESET TRIGGER */}
+      <SleepScienceModal
+        isOpen={showSleepScience}
+        onClose={() => setShowSleepScience(false)}
+        theme={theme}
+        onApplyPreset={handleApplySciencePreset}
+      />
+
+      {/* ANDROID APK DOWNLOAD & INSTALL MODAL */}
+      <AndroidDownloadModal
+        isOpen={showAndroidDownload}
+        onClose={() => setShowAndroidDownload(false)}
+        theme={theme}
+      />
 
       {/* FOOTER */}
       <footer className="mt-auto border-t border-[#292d37] py-5 px-4 sm:px-6 text-center text-xs text-[#717787]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 SlumberRain. Real field recordings & seamless procedural audio for restorative sleep.</p>
+          <p>© 2026 SlumberRain. Real field recordings &amp; seamless procedural audio for restorative sleep.</p>
           <div className="flex items-center gap-3 text-[#8a91a1]">
             <button
               type="button"
@@ -786,10 +803,19 @@ export default function App() {
             <span aria-hidden="true">·</span>
             <button
               type="button"
-              onClick={() => setShowSleepScience(!showSleepScience)}
+              onClick={() => setShowSleepScience(true)}
               className="hover:text-[#dfe3eb] transition-colors cursor-pointer"
             >
               Sleep Science
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
+              onClick={() => setShowAndroidDownload(true)}
+              className="hover:text-emerald-400 text-emerald-400/90 transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Android APK</span>
             </button>
           </div>
         </div>
